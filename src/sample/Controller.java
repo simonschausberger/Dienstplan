@@ -216,7 +216,7 @@ public class Controller {
             }
             rv = personal.get(i);
         }
-        //System.out.println(rv.getName());
+        System.out.println(rv.getName());
         return rv;
     }
 
