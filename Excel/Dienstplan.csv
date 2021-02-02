@@ -1,0 +1,15 @@
+;;K;L;L;N
+Montag;EF;x;FW;FW;FW
+Montag;TF;x;x;FW;FW
+Dienstag;EF;BE;BE;x;FW
+Dienstag;TF;x;x;x;FW
+Mittwoch;EF;x;BE;BE;FW
+Mittwoch;TF;x;x;x;FW
+Donnerstag;EF;x;BE;x;BE
+Donnerstag;TF;FW;x;x;x
+Freitag;EF;FW;BE;BE;FW
+Freitag;TF;x;x;x;x
+Samstag;EF;-;x;BE;x
+Samstag;TF;-;x;x;x
+Sonntag;EF;-;FW;-;BE
+Sonntag;TF;-;FW;-;x
