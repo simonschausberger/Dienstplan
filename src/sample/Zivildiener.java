@@ -3,6 +3,7 @@ package sample;
 public class Zivildiener {
     private String name;
     private int stunden;
+    private int anfangsstunden;
     private boolean fahrer;
     private boolean tag;
     private boolean nachtdienst;
@@ -11,12 +12,18 @@ public class Zivildiener {
     public Zivildiener(String name, int stunden, String fahrer) {
         this.name = name;
         this.stunden = stunden;
+        this.anfangsstunden = stunden;
         if (fahrer.equals("ja") || fahrer.equals("Ja") || fahrer.equals("JA")){
             this.fahrer = true;
         } else {
             this.fahrer = false;
         }
     }
+
+    public int getAnfangsstunden() {
+        return anfangsstunden;
+    }
+
 
     public void subStunden(int stunden) {
         this.stunden -= stunden;

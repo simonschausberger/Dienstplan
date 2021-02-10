@@ -9,21 +9,14 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 
 public class CustomException extends Exception{
-     CustomException(String message){
-        super(message);
-         Alert alert = new Alert(Alert.AlertType.ERROR);
-         alert.setContentText(message);
-         alert.setHeaderText("Du böser Wicht!");
-         FileInputStream inputstream = null;
-         try {
-             inputstream = new FileInputStream("./images/mike_boese.png");
-         } catch (FileNotFoundException e) {
-             e.printStackTrace();
-         }
-         Image image = new Image(inputstream);
+     CustomException(String content, String header, Alert.AlertType alertType, FileInputStream inputStream){
+        super(content);
+         Alert alert = new Alert(alertType);
+         alert.setContentText(content);
+         alert.setHeaderText(header);
+         Image image = new Image(inputStream);
          ImageView imageView = new ImageView(image);
          alert.setGraphic(imageView);
          alert.showAndWait();
      }
-
 }

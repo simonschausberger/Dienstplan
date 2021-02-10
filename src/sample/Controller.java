@@ -8,9 +8,9 @@ import javafx.scene.control.TextField;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.*;
-import java.nio.file.Path;
+import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Random;
+import java.util.Collections;
 import java.util.StringTokenizer;
 
 public class Controller {
@@ -20,8 +20,6 @@ public class Controller {
     private static final int NAME = 0;
     private static final int STUNDEN = 1;
     private static final int FAHRER = 2;
-    private static final int TAG = 0;
-    private static final int TYP = 1;
     private static final int KURZ = 2;
     private static final int LANG1 = 3;
     private static final int LANG2 = 4;
@@ -37,8 +35,8 @@ public class Controller {
     private static final String VARIABLE = "x";
     private static final boolean FAHRERDIENST = true;
     private static final boolean KEINFAHRERDIENST = false;
-    private static final int VERSUCHE = 100;
 
+    public int gesamtstunden;
     public Button btn_dienstplan;
     public Button btn_personal;
     public TextField tf_dienstplan;
@@ -75,13 +73,17 @@ public class Controller {
 
     public void StartProcessing(ActionEvent actionEvent) throws CustomException {
         if (tf_dienstplan.getText() == null || tf_dienstplan.getText().equals("") || tf_personal.getText() == null || tf_personal.getText().equals("")) {
-            throw new CustomException("Pfade müssen angegeben werden!");
+            try {
+                FileInputStream inputStream = new FileInputStream("./images/mike_boese.png");
+                throw new CustomException("Pfade müssen angegeben werden!", "Du böser Wicht!", Alert.AlertType.ERROR, inputStream);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         } else {
             try {
                 ReadPersonal();
                 ReadDienstplan();
-                String replace;
-                Zivildiener zivildiener = null;
+                Zivildiener zivildiener;
                 for (Tag tag : woche) {
                     ResetDienstFlag(TAGDIENST);
                     if (tag.getKurz().getEf().equals(VARIABLE)) {
@@ -132,7 +134,6 @@ public class Controller {
                 }
             } catch (IOException e) {
                 e.printStackTrace();
-                throw new CustomException("File kann nicht gefunden werden!");
             }
             for (Tag tag : woche) {
                 System.out.println("Kurz - EF: " + tag.getKurz().getEf());
@@ -147,77 +148,40 @@ public class Controller {
             for (Zivildiener zivildiener : personal) {
                 System.out.println(zivildiener.getName() + "|" + zivildiener.getStunden());
             }
-            Alert alert = new Alert(Alert.AlertType.INFORMATION);
-            alert.setHeaderText("SUPER DU!");
-            alert.setContentText("Dienstplan wurde erfolgreich erstellt!");
-            alert.showAndWait();
+            try {
+                FileInputStream inputStream = new FileInputStream("./images/mike_lieb.png");
+                throw new CustomException("Dienstplan wurde erstellt!", "SUPER DU!", Alert.AlertType.INFORMATION, inputStream);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
         }
     }
+    public void ReadPersonal() throws IOException {
+        FileReader fileReader = new FileReader(tf_personal.getText());
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        bufferedReader.readLine();
 
-    void ResetDienstFlag(String art) {
+        String line = "";
+
+        while ((line = bufferedReader.readLine()) != null) {
+            System.out.println(line);
+            StringTokenizer stringTokenizer = new StringTokenizer(line, DELIM);
+            String[] data = new String[stringTokenizer.countTokens()];
+            int count = 0;
+            while (stringTokenizer.hasMoreTokens()) {
+                data[count] = stringTokenizer.nextToken();
+                count++;
+            }
+            personal.add(new Zivildiener(data[NAME], Integer.parseInt(data[STUNDEN]), data[FAHRER]));
+        }
+
+        bufferedReader.close();
+        fileReader.close();
+
         for (Zivildiener zivildiener : personal) {
-            switch (art) {
-                case TAGDIENST:
-                    zivildiener.setTag(false);
-                    break;
-
-                case NACHTDIENST:
-                    zivildiener.setNachtdienst(false);
-                    break;
-
-                case EINGESETZT:
-                    zivildiener.setEingesetzt(false);
-                    break;
-            }
+            gesamtstunden += zivildiener.getStunden();
+            System.out.println(zivildiener.getName() + "|" + zivildiener.getStunden() + "|" + zivildiener.isFahrer());
         }
-    }
-
-    Zivildiener GetRandom(boolean fahrerdienst, int stunden, String art) {
-        Random random = new Random();
-        int i = 0;
-        int versuche = 0;
-        Zivildiener rv;
-
-        if (art.equals(TAGDIENST)) {
-            if (fahrerdienst) {
-                do {
-                    i = (int) (Math.random() * ((personal.size() - 1) - 0 + 1) + 0);
-                    //i = random.nextInt((personal.size() - 1));
-                    versuche++;
-                } while (((personal.get(i).isFahrer() != true) || (personal.get(i).getStunden() < stunden) || (personal.get(i).isTag()) || (personal.get(i).isNachtdienst())) && (versuche <= VERSUCHE));
-            } else {
-                do {
-                    i = (int) (Math.random() * (((personal.size() - 1) - 0) + 1) + 0);
-                    versuche++;
-                } while (((personal.get(i).getStunden() < stunden) || (personal.get(i).isTag()) || (personal.get(i).isNachtdienst())) && (versuche <= VERSUCHE));
-            }
-        } else {
-            if (fahrerdienst) {
-                do {
-                    i = (int) (Math.random() * (((personal.size() - 1) - 0) + 1) + 0);
-                    versuche++;
-                } while (((personal.get(i).isFahrer() != true) || (personal.get(i).getStunden() < stunden) || (personal.get(i).isTag()) || (personal.get(i).isNachtdienst())) && (versuche <= VERSUCHE));
-            } else {
-                do {
-                    i = (int) (Math.random() * (((personal.size() - 1) - 0) + 1) + 0);
-                    versuche++;
-                } while (((personal.get(i).getStunden() < stunden) || (personal.get(i).isTag()) || (personal.get(i).isNachtdienst())) && (versuche <= VERSUCHE));
-            }
-        }
-        if (versuche >= VERSUCHE) {
-            Zivildiener keinName = new Zivildiener("NA", 0, "nein");
-            rv = keinName;
-        } else {
-            personal.get(i).subStunden(stunden);
-            if (art.equals(TAGDIENST)) {
-                personal.get(i).setTag(true);
-            } else {
-                personal.get(i).setNachtdienst(true);
-            }
-            rv = personal.get(i);
-        }
-        //System.out.println(rv.getName());
-        return rv;
     }
 
     private void ReadDienstplan() throws IOException {
@@ -243,6 +207,71 @@ public class Controller {
         fileReader.close();
     }
 
+    void ResetDienstFlag(String art) {
+        for (Zivildiener zivildiener : personal) {
+            switch (art) {
+                case TAGDIENST:
+                    zivildiener.setTag(false);
+                    break;
+
+                case NACHTDIENST:
+                    zivildiener.setNachtdienst(false);
+                    break;
+
+                case EINGESETZT:
+                    zivildiener.setEingesetzt(false);
+                    break;
+            }
+        }
+    }
+
+    Zivildiener GetRandom(boolean fahrerdienst, int stunden, String art) {
+        Zivildiener rv = new Zivildiener("NA", 0, "nein");
+        ArrayList<Integer> indexarray = new ArrayList();
+        SecureRandom random = new SecureRandom();
+
+        if (fahrerdienst) {
+            for (int i = 0; i < personal.size(); i++) {
+                if ((personal.get(i).isFahrer()) && (personal.get(i).getStunden() >= stunden) && (!personal.get(i).isTag()) && (!personal.get(i).isNachtdienst())) {
+                    indexarray.add(i);
+                }
+            }
+        } else {
+            for (int i = 0; i < personal.size(); i++) {
+                if ((personal.get(i).getStunden() >= stunden) && (!personal.get(i).isTag()) && (!personal.get(i).isNachtdienst())) {
+                    indexarray.add(i);
+                }
+            }
+        }
+
+        if (indexarray.size() > 0) {
+            float max = 0;
+            float relativ = 0;
+            int selected = 0;
+
+            Collections.shuffle(indexarray, random);
+            for (Integer index : indexarray) {
+                System.out.println(personal.get(index).getName());
+                float rest = personal.get(index).getStunden();
+                float anfang = personal.get(index).getAnfangsstunden();
+                relativ = rest / anfang;
+                System.out.println(relativ);
+                if (relativ > max) {
+                    max = relativ;
+                    selected = index;
+                }
+            }
+            personal.get(selected).subStunden(stunden);
+            if (art.equals(TAGDIENST)) {
+                personal.get(selected).setTag(true);
+            } else {
+                personal.get(selected).setNachtdienst(true);
+            }
+            rv = personal.get(selected);
+        }
+        return rv;
+    }
+
     private String[] ReadTeam(String line) {
         StringTokenizer stringTokenizer = new StringTokenizer(line, DELIM);
         String[] data = new String[stringTokenizer.countTokens()];
@@ -252,31 +281,5 @@ public class Controller {
             count++;
         }
         return data;
-    }
-
-    public void ReadPersonal() throws IOException {
-        FileReader fileReader = new FileReader(tf_personal.getText());
-        BufferedReader bufferedReader = new BufferedReader(fileReader);
-        bufferedReader.readLine();
-
-        String line = "";
-
-        while ((line = bufferedReader.readLine()) != null) {
-            System.out.println(line);
-            StringTokenizer stringTokenizer = new StringTokenizer(line, DELIM);
-            String[] data = new String[stringTokenizer.countTokens()];
-            int count = 0;
-            while (stringTokenizer.hasMoreTokens()) {
-                data[count] = stringTokenizer.nextToken();
-                count++;
-            }
-            personal.add(new Zivildiener(data[NAME], Integer.parseInt(data[STUNDEN]), data[FAHRER]));
-        }
-        bufferedReader.close();
-        fileReader.close();
-
-        for (Zivildiener zivildiener : personal) {
-            System.out.println(zivildiener.getName() + "|" + zivildiener.getStunden() + "|" + zivildiener.isFahrer());
-        }
     }
 }
